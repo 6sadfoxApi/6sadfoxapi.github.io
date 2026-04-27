@@ -1,6 +1,6 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/README.md b/README.md
-index ece94f44c7f937f578a4153f1accf205eb033772..a6a09544a59caf93f445674d10dbb698fc67bce5 100644
+index ece94f44c7f937f578a4153f1accf205eb033772..f255df9c290ffcffeb403491811588431fa70562 100644
 --- a/README.md
 +++ b/README.md
 @@ -1,85 +1,24 @@
@@ -93,7 +93,7 @@ index ece94f44c7f937f578a4153f1accf205eb033772..a6a09544a59caf93f445674d10dbb698
 +
 +This repository hosts a GitHub Pages site at:
 +
-+- https://6sadfoxapi.github.io/
++- https://6sadfoxapi.github.io/6sadfox-github.io/
 +
 +## Files
 +
