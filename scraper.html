@@ -1,10 +1,10 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/scraper.html b/scraper.html
 new file mode 100644
-index 0000000000000000000000000000000000000000..bf281e569d9a515c5252be9a8af743e02e2c0531
+index 0000000000000000000000000000000000000000..31ca5710fd84cf9e0d7d7e773a6e3747056209b7
 --- /dev/null
 +++ b/scraper.html
-@@ -0,0 +1,47 @@
+@@ -0,0 +1,66 @@
 +<!doctype html>
 +<html lang="en">
 +  <head>
@@ -13,10 +13,29 @@ index 0000000000000000000000000000000000000000..bf281e569d9a515c5252be9a8af743e0
 +    <title>6SadFox | Scraper</title>
 +    <meta name="description" content="Scrape URL metadata and generate AI summaries." />
 +
-+    <link rel="stylesheet" href="style.css" />
++    <link rel="stylesheet" href="style.css?v=3" />
++
++    <style id="critical-neon-fallback">
++      body {
++        margin: 0;
++        background: #030603;
++        color: #c7ffd1;
++        font-family: Consolas, 'Courier New', monospace;
++      }
++      .container {
++        width: min(980px, 92%);
++        margin: 0 auto;
++        padding: 2.5rem 0 3rem;
++      }
++      h1 { color: #39ff88; }
++    </style>
 +  </head>
 +
 +  <body>
++    <div class="cyber-bg" aria-hidden="true">
++      <div class="glow-orb"></div>
++      <div class="scan-lines"></div>
++    </div>
 +    <main class="container">
 +      <nav class="top-nav">
 +        <a href="index.html">Home</a>
@@ -49,7 +68,7 @@ index 0000000000000000000000000000000000000000..bf281e569d9a515c5252be9a8af743e0
 +      <footer>API key is loaded from OPENAI_API_KEY on the server.</footer>
 +    </main>
 +
-+    <script src="scraper.js"></script>
++    <script src="scraper.js?v=3"></script>
 +  </body>
 +</html>
  
