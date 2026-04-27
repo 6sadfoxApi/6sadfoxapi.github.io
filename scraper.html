@@ -1,0 +1,57 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/scraper.html b/scraper.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..bf281e569d9a515c5252be9a8af743e02e2c0531
+--- /dev/null
++++ b/scraper.html
+@@ -0,0 +1,47 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>6SadFox | Scraper</title>
++    <meta name="description" content="Scrape URL metadata and generate AI summaries." />
++
++    <link rel="stylesheet" href="style.css" />
++  </head>
++
++  <body>
++    <main class="container">
++      <nav class="top-nav">
++        <a href="index.html">Home</a>
++        <a href="about.html">About Me</a>
++        <a href="scraper.html" aria-current="page">Scraper</a>
++      </nav>
++
++      <h1>&gt; Metadata Scraper</h1>
++      <p class="subtitle">Paste a URL and push one button to scrape, store, and summarize.</p>
++
++      <section class="terminal">
++        <div class="terminal-bar">scraper :: one-click</div>
++        <div class="terminal-content">
++          <div class="scraper-form">
++            <input id="urlInput" type="url" placeholder="https://example.com" />
++            <button id="scrapeButton" type="button">Scrape URL</button>
++          </div>
++          <p id="scraperStatus" class="status-line">Ready.</p>
++          <article id="resultCard" class="card hidden"></article>
++        </div>
++      </section>
++
++      <section class="terminal">
++        <div class="terminal-bar">storage :: latest scrapes</div>
++        <div class="terminal-content">
++          <ul id="historyList" class="history-list"></ul>
++        </div>
++      </section>
++
++      <footer>API key is loaded from OPENAI_API_KEY on the server.</footer>
++    </main>
++
++    <script src="scraper.js"></script>
++  </body>
++</html>
+ 
+EOF
+)
