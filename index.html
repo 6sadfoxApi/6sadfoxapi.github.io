@@ -1,0 +1,28 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/index.html b/index.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..084c6cb501ace11e2c5cb71182f14040006ee187
+--- /dev/null
++++ b/index.html
+@@ -0,0 +1,18 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>6sadfox GitHub Pages</title>
++    <style>
++      body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.5; }
++      code { background: #f3f4f6; padding: 0.15rem 0.35rem; border-radius: 4px; }
++    </style>
++  </head>
++  <body>
++    <h1>6sadfox GitHub Pages is live</h1>
++    <p>This site is now served from:</p>
++    <p><a href="https://6sadfoxapi.github.io/6sadfox-github.io/">https://6sadfoxapi.github.io/6sadfox-github.io/</a></p>
++    <p>If you still see a 404, wait a minute and refresh after GitHub Pages finishes deploying.</p>
++  </body>
++</html>
+ 
+EOF
+)
