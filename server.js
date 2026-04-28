@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const dns = require('dns').promises;
 const net = require('net');
+const crypto = require('crypto');
 
 const cors = require('cors');
 const express = require('express');
@@ -15,58 +16,49 @@ const PORT = Number(process.env.PORT || 3000);
 
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
-const DATA_FILE = path.join(DATA_DIR, 'scrapes.json');
+const SCRAPES_FILE = path.join(DATA_DIR, 'scrapes.json');
+const NOTES_FILE = path.join(DATA_DIR, 'notes.json');
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(ROOT));
 
-function ensureDataFile() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, '[]', 'utf8');
-  }
+function ensureJsonFile(filePath) {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '[]', 'utf8');
 }
 
-function readScrapes() {
-  ensureDataFile();
-
+function readJson(filePath) {
+  ensureJsonFile(filePath);
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch {
     return [];
   }
 }
 
-function writeScrapes(scrapes) {
-  ensureDataFile();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(scrapes, null, 2), 'utf8');
+function writeJson(filePath, data) {
+  ensureJsonFile(filePath);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+}
+
+function getClientIp(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+    || req.socket.remoteAddress
+    || 'unknown';
 }
 
 function isPrivateIp(ip) {
   if (net.isIP(ip) === 4) {
-    const parts = ip.split('.').map(Number);
-
-    return (
-      parts[0] === 10 ||
-      parts[0] === 127 ||
-      (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
-      (parts[0] === 192 && parts[1] === 168) ||
-      (parts[0] === 169 && parts[1] === 254) ||
-      parts[0] === 0
-    );
+    const p = ip.split('.').map(Number);
+    return p[0] === 10 || p[0] === 127 || p[0] === 0 ||
+      (p[0] === 172 && p[1] >= 16 && p[1] <= 31) ||
+      (p[0] === 192 && p[1] === 168) ||
+      (p[0] === 169 && p[1] === 254);
   }
 
   if (net.isIP(ip) === 6) {
-    return (
-      ip === '::1' ||
-      ip.startsWith('fc') ||
-      ip.startsWith('fd') ||
-      ip.startsWith('fe80')
-    );
+    return ip === '::1' || ip.startsWith('fc') || ip.startsWith('fd') || ip.startsWith('fe80');
   }
 
   return true;
@@ -81,12 +73,8 @@ async function validatePublicUrl(rawUrl) {
 
   const records = await dns.lookup(parsed.hostname, { all: true });
 
-  if (!records.length) {
-    throw new Error('Could not resolve hostname.');
-  }
-
-  if (records.some((record) => isPrivateIp(record.address))) {
-    throw new Error('Private/internal network URLs are blocked.');
+  if (!records.length || records.some((r) => isPrivateIp(r.address))) {
+    throw new Error('Private/internal URLs are blocked.');
   }
 
   return parsed.toString();
@@ -95,29 +83,26 @@ async function validatePublicUrl(rawUrl) {
 function extractMetadata(html, url) {
   const $ = cheerio.load(html);
 
-  const title =
-    $('meta[property="og:title"]').attr('content') ||
-    $('meta[name="twitter:title"]').attr('content') ||
-    $('title').first().text() ||
-    'Untitled';
-
-  const description =
-    $('meta[property="og:description"]').attr('content') ||
-    $('meta[name="description"]').attr('content') ||
-    $('meta[name="twitter:description"]').attr('content') ||
-    'No description found.';
-
-  const image =
-    $('meta[property="og:image"]').attr('content') ||
-    $('meta[name="twitter:image"]').attr('content') ||
-    '';
-
   return {
     id: crypto.randomUUID(),
     url,
-    title: title.trim(),
-    description: description.trim(),
-    image,
+    title: (
+      $('meta[property="og:title"]').attr('content') ||
+      $('meta[name="twitter:title"]').attr('content') ||
+      $('title').first().text() ||
+      'Untitled'
+    ).trim(),
+    description: (
+      $('meta[property="og:description"]').attr('content') ||
+      $('meta[name="description"]').attr('content') ||
+      $('meta[name="twitter:description"]').attr('content') ||
+      'No description found.'
+    ).trim(),
+    image: (
+      $('meta[property="og:image"]').attr('content') ||
+      $('meta[name="twitter:image"]').attr('content') ||
+      ''
+    ).trim(),
     createdAt: new Date().toISOString()
   };
 }
@@ -127,8 +112,7 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/history', (req, res) => {
-  const scrapes = readScrapes();
-  res.json(scrapes.slice().reverse());
+  res.json(readJson(SCRAPES_FILE).slice().reverse());
 });
 
 app.post('/api/scrape', async (req, res) => {
@@ -143,45 +127,72 @@ app.post('/api/scrape', async (req, res) => {
 
     const response = await fetch(safeUrl, {
       headers: {
-        'User-Agent': '6SadFoxBot/1.0 (+https://6sadfoxapi.github.io)'
+        'User-Agent': '6SadFoxBot/1.0'
       },
       signal: AbortSignal.timeout(12000)
     });
 
     if (!response.ok) {
-      return res.status(400).json({
-        error: `Fetch failed with status ${response.status}`
-      });
+      return res.status(400).json({ error: `Fetch failed with status ${response.status}` });
     }
 
     const contentType = response.headers.get('content-type') || '';
 
     if (!contentType.includes('text/html')) {
-      return res.status(400).json({
-        error: 'URL did not return HTML.'
-      });
+      return res.status(400).json({ error: 'URL did not return HTML.' });
     }
 
     const html = await response.text();
     const scrape = extractMetadata(html, safeUrl);
 
-    const scrapes = readScrapes();
+    const scrapes = readJson(SCRAPES_FILE);
     scrapes.push(scrape);
-    writeScrapes(scrapes.slice(-100));
+    writeJson(SCRAPES_FILE, scrapes.slice(-100));
 
     res.json(scrape);
   } catch (error) {
-    res.status(500).json({
-      error: error.message || 'Scrape failed.'
-    });
+    res.status(500).json({ error: error.message || 'Scrape failed.' });
   }
+});
+
+app.get('/api/notes', (req, res) => {
+  res.json(readJson(NOTES_FILE).slice().reverse());
+});
+
+app.post('/api/notes', (req, res) => {
+  const { text } = req.body;
+
+  if (!text || typeof text !== 'string') {
+    return res.status(400).json({ error: 'Missing note text.' });
+  }
+
+  const note = {
+    id: crypto.randomUUID(),
+    text: text.trim(),
+    createdAt: new Date().toISOString(),
+    ipAddress: getClientIp(req),
+    userAgent: req.headers['user-agent'] || 'unknown',
+    source: 'homepage-notes'
+  };
+
+  const notes = readJson(NOTES_FILE);
+  notes.push(note);
+  writeJson(NOTES_FILE, notes.slice(-250));
+
+  res.json(note);
+});
+
+app.delete('/api/notes', (req, res) => {
+  writeJson(NOTES_FILE, []);
+  res.json({ status: 'ok', message: 'Notes cleared.' });
 });
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(ROOT, 'index.html'));
 });
 
-ensureDataFile();
+ensureJsonFile(SCRAPES_FILE);
+ensureJsonFile(NOTES_FILE);
 
 app.listen(PORT, () => {
   console.log(`Server is live on http://localhost:${PORT}`);
