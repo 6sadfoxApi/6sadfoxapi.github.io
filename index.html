@@ -1,42 +1,72 @@
-cat > index.html <<'EOF'
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>6SadFox | Home</title>
-  <link rel="stylesheet" href="style.css?v=9" />
-</head>
-
-<body>
-  <main class="container">
-
-    <h1>&gt; AI Notes + Timeline</h1>
-
-    <section class="terminal">
-      <div class="terminal-bar">notes :: database + ai-timeline</div>
-
-      <div class="terminal-content">
-        <textarea id="noteInput" placeholder="Type note..."></textarea>
-
-        <div class="button-row">
-          <button id="saveNote">Save Note</button>
-          <button id="clearNotes">Clear</button>
-        </div>
-
-        <p id="noteStatus">Ready.</p>
-
-        <h2>AI Thinking Timeline</h2>
-        <div id="thinkingTimeline"></div>
-
-        <h2>Saved Notes</h2>
-        <div id="notesList"></div>
-      </div>
-    </section>
-
-  </main>
-
-  <script src="script.js?v=9"></script>
-</body>
-</html>
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/index.html b/index.html
+index f556262d42bbcb76dd98193b1897893e47e599d9..d26b9ea62dfe98deb39034d2574dcb6bfdcad38a 100644
+--- a/index.html
++++ b/index.html
+@@ -1,42 +1,46 @@
+-cat > index.html <<'EOF'
+ <!doctype html>
+ <html lang="en">
+ <head>
+   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-  <title>6SadFox | Home</title>
+-  <link rel="stylesheet" href="style.css?v=9" />
++  <title>6SadFox | AI Notes</title>
++  <link rel="stylesheet" href="style.css?v=10" />
+ </head>
+-
+ <body>
+   <main class="container">
++    <h1 class="rainbow-text">&gt; AI Notes + Timeline</h1>
++    <p class="subtitle">Save structured notes, track processing, and generate AI-ready summaries.</p>
+ 
+-    <h1>&gt; AI Notes + Timeline</h1>
+-
+-    <section class="terminal">
++    <section class="terminal tied-together">
+       <div class="terminal-bar">notes :: database + ai-timeline</div>
+-
+       <div class="terminal-content">
+-        <textarea id="noteInput" placeholder="Type note..."></textarea>
++        <div class="form-grid">
++          <textarea id="noteInput" placeholder="Type note..."></textarea>
++          <input id="noteTags" type="text" placeholder="tags (comma separated)" />
++          <select id="notePriority">
++            <option value="low">Low priority</option>
++            <option value="normal" selected>Normal priority</option>
++            <option value="high">High priority</option>
++          </select>
++        </div>
+ 
+         <div class="button-row">
+-          <button id="saveNote">Save Note</button>
+-          <button id="clearNotes">Clear</button>
++          <button id="saveNote" type="button">Save Note</button>
++          <button id="refreshNotes" type="button">Refresh</button>
++          <button id="clearNotes" type="button">Clear</button>
+         </div>
+ 
+-        <p id="noteStatus">Ready.</p>
++        <p id="noteStatus" class="status-line">Ready.</p>
+ 
+-        <h2>AI Thinking Timeline</h2>
++        <h2 class="rainbow-text">AI Thinking Timeline</h2>
+         <div id="thinkingTimeline"></div>
+ 
+-        <h2>Saved Notes</h2>
++        <h2 class="rainbow-text">Saved Notes</h2>
+         <div id="notesList"></div>
+       </div>
+     </section>
+-
+   </main>
+ 
+-  <script src="script.js?v=9"></script>
++  <script src="script.js?v=10"></script>
+ </body>
+ </html>
+-EOF
+ 
 EOF
+)
