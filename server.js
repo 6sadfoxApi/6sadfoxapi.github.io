@@ -30,6 +30,7 @@ function ensureJsonFile(filePath) {
 
 function readJson(filePath) {
   ensureJsonFile(filePath);
+
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch {
@@ -46,6 +47,39 @@ function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
     || req.socket.remoteAddress
     || 'unknown';
+}
+
+function createThinkingTimeline(text) {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const now = Date.now();
+
+  return [
+    {
+      label: 'Note received',
+      detail: `Captured ${words.length} words from homepage input.`,
+      at: new Date(now).toISOString()
+    },
+    {
+      label: 'Metadata attached',
+      detail: 'Added timestamp, request IP, source page, and browser user agent.',
+      at: new Date(now + 300).toISOString()
+    },
+    {
+      label: 'Intent scan',
+      detail: words.length > 8 ? 'Longer note detected. Marked as detailed input.' : 'Short note detected. Marked as quick input.',
+      at: new Date(now + 600).toISOString()
+    },
+    {
+      label: 'Database write',
+      detail: 'Saved note to data/notes.json.',
+      at: new Date(now + 900).toISOString()
+    },
+    {
+      label: 'AI-ready output',
+      detail: 'Note is now available through /api/notes for your robot/backend.',
+      at: new Date(now + 1200).toISOString()
+    }
+  ];
 }
 
 function isPrivateIp(ip) {
@@ -126,9 +160,7 @@ app.post('/api/scrape', async (req, res) => {
     const safeUrl = await validatePublicUrl(url);
 
     const response = await fetch(safeUrl, {
-      headers: {
-        'User-Agent': '6SadFoxBot/1.0'
-      },
+      headers: { 'User-Agent': '6SadFoxBot/1.0' },
       signal: AbortSignal.timeout(12000)
     });
 
@@ -142,10 +174,9 @@ app.post('/api/scrape', async (req, res) => {
       return res.status(400).json({ error: 'URL did not return HTML.' });
     }
 
-    const html = await response.text();
-    const scrape = extractMetadata(html, safeUrl);
-
+    const scrape = extractMetadata(await response.text(), safeUrl);
     const scrapes = readJson(SCRAPES_FILE);
+
     scrapes.push(scrape);
     writeJson(SCRAPES_FILE, scrapes.slice(-100));
 
@@ -166,13 +197,21 @@ app.post('/api/notes', (req, res) => {
     return res.status(400).json({ error: 'Missing note text.' });
   }
 
+  const cleanText = text.trim();
+
   const note = {
     id: crypto.randomUUID(),
-    text: text.trim(),
+    text: cleanText,
     createdAt: new Date().toISOString(),
     ipAddress: getClientIp(req),
     userAgent: req.headers['user-agent'] || 'unknown',
-    source: 'homepage-notes'
+    source: 'homepage-notes',
+    metadata: {
+      length: cleanText.length,
+      wordCount: cleanText.split(/\s+/).filter(Boolean).length,
+      endpoint: '/api/notes'
+    },
+    thinkingTimeline: createThinkingTimeline(cleanText)
   };
 
   const notes = readJson(NOTES_FILE);
