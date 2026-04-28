@@ -228,3 +228,187 @@ footer {
     opacity: 0.85;
   }
 }
+
+cat >> style.css <<'EOF'
+
+textarea {
+  width: 100%;
+  min-height: 120px;
+  background: #021002;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(57, 255, 136, 0.15);
+}
+
+.button-row {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+
+button {
+  background: var(--accent);
+  color: #011806;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 0.95rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:hover {
+  filter: brightness(0.9);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ghost-button {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.timeline-box,
+.database-box {
+  margin-top: 1rem;
+  border-top: 1px solid rgba(57, 255, 136, 0.18);
+  padding-top: 1rem;
+}
+
+.timeline-box h2,
+.database-box h2 {
+  font-size: 1rem;
+  margin: 0 0 0.7rem;
+}
+
+.thinking-timeline {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.timeline-empty {
+  color: var(--muted);
+  border: 1px dashed rgba(57, 255, 136, 0.25);
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 0.7rem;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: timeline-in 0.35s ease forwards;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  margin-top: 0.32rem;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 14px rgba(57, 255, 136, 0.75);
+}
+
+.timeline-content {
+  background: rgba(4, 16, 4, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.timeline-content p {
+  margin: 0.35rem 0;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.timeline-content small {
+  color: var(--muted);
+}
+
+.note-card {
+  background: rgba(4, 16, 4, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.85rem;
+  margin-top: 0.7rem;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(57, 255, 136, 0.08);
+}
+
+.note-card:hover {
+  border-color: var(--accent);
+}
+
+.note-card small {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.note-card p {
+  margin: 0.35rem 0 0.6rem;
+  line-height: 1.5;
+}
+
+.note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  border-top: 1px solid rgba(57, 255, 136, 0.18);
+  padding-top: 0.45rem;
+  margin-top: 0.45rem;
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--muted);
+}
+
+.scoreboard strong {
+  color: var(--accent);
+}
+
+.saved-pop {
+  animation: saved-pop 0.35s ease-out;
+}
+
+@keyframes saved-pop {
+  from {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes timeline-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+EOF
