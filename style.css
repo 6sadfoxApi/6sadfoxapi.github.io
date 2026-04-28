@@ -1,61 +1,175 @@
-cat > style.css <<'EOF'
-body {
-  background: #030603;
-  color: #c7ffd1;
-  font-family: Consolas, monospace;
-  margin: 0;
-}
-
-.container {
-  width: 92%;
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-}
-
-textarea {
-  width: 100%;
-  height: 100px;
-  background: #021002;
-  color: #c7ffd1;
-  border: 1px solid #1b4d2a;
-  padding: 10px;
-}
-
-button {
-  background: #39ff88;
-  border: none;
-  padding: 10px 14px;
-  margin-right: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-button.is-saving {
-  animation: pulse 0.7s infinite;
-}
-
-button.saved-flash {
-  animation: flash 0.4s;
-}
-
-@keyframes pulse {
-  50% { transform: scale(1.06); }
-}
-
-@keyframes flash {
-  50% { transform: scale(1.1); }
-}
-
-.note-card {
-  border: 1px solid #1b4d2a;
-  padding: 10px;
-  margin-top: 10px;
-}
-
-.timeline-item {
-  border-left: 2px solid #39ff88;
-  padding-left: 10px;
-  margin: 8px 0;
-}
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/style.css b/style.css
+index 420c83eff79c3dcf6917f969f4d5efc5282392f0..8bcdacde07ec2221b7d9a0040cfb9f8a38ba48fc 100644
+--- a/style.css
++++ b/style.css
+@@ -1,61 +1,140 @@
+-cat > style.css <<'EOF'
++:root {
++  --bg-0: #000000;
++  --bg-1: #071207;
++  --panel-0: #020402;
++  --panel-1: #0a1d0d;
++  --neon: #39ff88;
++  --text: #cfffd9;
++  --muted: #87d79d;
++  --line: #1b4d2a;
++}
++
++* {
++  box-sizing: border-box;
++}
++
+ body {
+-  background: #030603;
+-  color: #c7ffd1;
+-  font-family: Consolas, monospace;
+   margin: 0;
++  font-family: Consolas, "Courier New", monospace;
++  color: var(--text);
++  background: radial-gradient(circle at top, #123312 0%, var(--bg-1) 35%, var(--bg-0) 100%);
+ }
+ 
+ .container {
+-  width: 92%;
+-  max-width: 900px;
+-  margin: auto;
+-  padding: 20px;
++  width: min(940px, 92%);
++  margin: 20px auto;
+ }
+ 
+-textarea {
++.subtitle {
++  color: var(--muted);
++  margin-top: -2px;
++}
++
++.terminal.tied-together {
++  border: 1px solid #2fa34f;
++  border-radius: 12px;
++  background: linear-gradient(180deg, rgba(0, 0, 0, 0.92), rgba(5, 30, 5, 0.88));
++  box-shadow: 0 0 25px rgba(57, 255, 136, 0.15);
++  overflow: hidden;
++}
++
++.terminal-bar {
++  background: rgba(0, 0, 0, 0.85);
++  border-bottom: 1px solid var(--line);
++  color: #8bffb5;
++  font-weight: 700;
++  letter-spacing: 0.5px;
++  padding: 10px 12px;
++}
++
++.terminal-content {
++  padding: 14px;
++}
++
++.form-grid {
++  display: grid;
++  grid-template-columns: 1fr;
++  gap: 10px;
++}
++
++textarea,
++input,
++select {
+   width: 100%;
+-  height: 100px;
+   background: #021002;
+-  color: #c7ffd1;
+-  border: 1px solid #1b4d2a;
++  color: var(--text);
++  border: 1px solid var(--line);
+   padding: 10px;
+ }
+ 
++textarea {
++  min-height: 110px;
++  resize: vertical;
++}
++
+ button {
+-  background: #39ff88;
++  background: var(--neon);
+   border: none;
+   padding: 10px 14px;
+   margin-right: 6px;
+   cursor: pointer;
+   font-weight: bold;
+ }
+ 
+-button.is-saving {
+-  animation: pulse 0.7s infinite;
+-}
+-
+-button.saved-flash {
+-  animation: flash 0.4s;
++button:disabled {
++  opacity: 0.7;
++  cursor: not-allowed;
+ }
+ 
+-@keyframes pulse {
+-  50% { transform: scale(1.06); }
++.button-row {
++  margin-top: 10px;
++  margin-bottom: 8px;
+ }
+ 
+-@keyframes flash {
+-  50% { transform: scale(1.1); }
++.status-line {
++  min-height: 1.2rem;
++  color: var(--muted);
+ }
+ 
+ .note-card {
+-  border: 1px solid #1b4d2a;
++  border: 1px solid var(--line);
+   padding: 10px;
+   margin-top: 10px;
++  border-radius: 8px;
++  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(12, 33, 12, 0.35));
++}
++
++.note-head {
++  display: flex;
++  justify-content: space-between;
++  gap: 8px;
++  align-items: baseline;
++}
++
++.note-meta {
++  font-size: 0.83rem;
++  color: #99e2af;
+ }
+ 
+ .timeline-item {
+-  border-left: 2px solid #39ff88;
++  border-left: 2px solid var(--neon);
+   padding-left: 10px;
+   margin: 8px 0;
+ }
+-EOF
++
++.rainbow-text {
++  background: linear-gradient(90deg, #39ff88, #00e5ff, #f5ff63, #39ff88);
++  -webkit-background-clip: text;
++  background-clip: text;
++  color: transparent;
++}
++
++.tag {
++  border: 1px solid #2f8a4a;
++  border-radius: 999px;
++  padding: 2px 8px;
++  font-size: 0.74rem;
++  display: inline-block;
++  margin-right: 6px;
++  margin-top: 6px;
++}
+ 
 EOF
+)
